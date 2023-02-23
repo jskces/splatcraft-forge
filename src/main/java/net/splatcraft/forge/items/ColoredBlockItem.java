@@ -37,10 +37,12 @@ import net.splatcraft.forge.util.ColorUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class ColoredBlockItem extends BlockItem implements IColoredItem
 {
+    public static final HashMap<Item, ColoredBlockItem> inkCoatingRecipes = new HashMap<>();
 
     private final Item clearItem;
     private boolean addStartersToTab = false;
@@ -49,7 +51,7 @@ public class ColoredBlockItem extends BlockItem implements IColoredItem
     {
         super(block, properties);
         SplatcraftItems.inkColoredItems.add(this);
-        InkwellTileEntity.inkCoatingRecipes.put(clearItem, this);
+        inkCoatingRecipes.put(clearItem, this);
         setRegistryName(name);
         this.clearItem = clearItem;
     }

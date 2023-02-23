@@ -4,6 +4,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -12,8 +13,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
@@ -27,10 +31,12 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.splatcraft.forge.blocks.IColoredBlock;
+import net.splatcraft.forge.blocks.InkwellBlock;
 import net.splatcraft.forge.data.SplatcraftTags;
 import net.splatcraft.forge.data.capabilities.inkoverlay.InkOverlayCapability;
 import net.splatcraft.forge.data.capabilities.playerinfo.IPlayerInfo;
 import net.splatcraft.forge.data.capabilities.playerinfo.PlayerInfoCapability;
+import net.splatcraft.forge.items.ColoredBlockItem;
 import net.splatcraft.forge.items.InkTankItem;
 import net.splatcraft.forge.items.InkWaxerItem;
 import net.splatcraft.forge.network.SplatcraftPacketHandler;
@@ -41,6 +47,7 @@ import net.splatcraft.forge.network.s2c.UpdateColorScoresPacket;
 import net.splatcraft.forge.network.s2c.UpdatePlayerInfoPacket;
 import net.splatcraft.forge.registries.SplatcraftGameRules;
 import net.splatcraft.forge.tileentities.InkedBlockTileEntity;
+import net.splatcraft.forge.tileentities.InkwellTileEntity;
 import net.splatcraft.forge.util.ColorUtils;
 import net.splatcraft.forge.util.CommonUtils;
 import net.splatcraft.forge.util.InkBlockUtils;
@@ -274,6 +281,23 @@ public class SplatcraftCommonHandler
                 SplatcraftPacketHandler.sendToAll(new UpdateBooleanGamerulesPacket(SplatcraftGameRules.getRuleFromIndex(rule.getKey()), rule.getValue()));
             }
         }
+
+        //Inkwell Coating Recipes
+        if(event.world instanceof ServerWorld)
+            ((ServerWorld) event.world).getEntities().filter(entity -> entity instanceof ItemEntity && event.world.hasChunk(MathHelper.floor(entity.getX()) >> 4, MathHelper.floor(entity.getZ()) >> 4))
+                    .forEach(entity ->
+            {
+                BlockPos pos = entity.blockPosition().below();
+                BlockState state = entity.level.getBlockState(pos);
+                if(state.getBlock() instanceof InkwellBlock)
+                {
+                    ItemStack stack = ((ItemEntity) entity).getItem();
+
+                    if (ColoredBlockItem.inkCoatingRecipes.containsKey(stack.getItem()))
+                        ((ItemEntity) entity).setItem(ColorUtils.setColorLocked(ColorUtils.setInkColor(new ItemStack(ColoredBlockItem.inkCoatingRecipes.get(stack.getItem())), ((InkwellBlock) state.getBlock()).getColor(level, pos)), true));
+                }
+
+            });
     }
 
     @SubscribeEvent

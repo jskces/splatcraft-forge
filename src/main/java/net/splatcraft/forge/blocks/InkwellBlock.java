@@ -30,8 +30,8 @@ import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ToolType;
 import net.minecraftforge.common.util.ForgeSoundType;
+import net.splatcraft.forge.data.capabilities.blockcolorinfo.ColorInfoCapability;
 import net.splatcraft.forge.registries.SplatcraftBlocks;
-import net.splatcraft.forge.registries.SplatcraftTileEntitites;
 import net.splatcraft.forge.tileentities.InkColorTileEntity;
 import net.splatcraft.forge.util.ColorUtils;
 import org.jetbrains.annotations.Nullable;
@@ -106,7 +106,7 @@ public class InkwellBlock extends Block implements IColoredBlock, IWaterLoggable
     @Override
     public PushReaction getPistonPushReaction(BlockState state)
     {
-        return PushReaction.DESTROY;
+        return PushReaction.NORMAL;
     }
 
     @Override
@@ -134,10 +134,9 @@ public class InkwellBlock extends Block implements IColoredBlock, IWaterLoggable
     @Override
     public void setPlacedBy(World level, BlockPos pos, BlockState state, @Nullable LivingEntity entity, ItemStack stack)
     {
-        if (!level.isClientSide && stack.getTag() != null && level.getBlockEntity(pos) instanceof InkColorTileEntity)
-        {
-            ColorUtils.setInkColor(level.getBlockEntity(pos), ColorUtils.getInkColor(stack));
-        }
+        if (stack.getTag() != null)
+            ColorUtils.setInkColor(level, pos, ColorUtils.getInkColor(stack));
+
         super.setPlacedBy(level, pos, state, entity, stack);
     }
 
@@ -147,6 +146,7 @@ public class InkwellBlock extends Block implements IColoredBlock, IWaterLoggable
         return true;
     }
 
+    /* ladies and gentlemen, wahoo
     @Override
     public boolean hasTileEntity(BlockState state)
     {
@@ -159,6 +159,7 @@ public class InkwellBlock extends Block implements IColoredBlock, IWaterLoggable
     {
         return SplatcraftTileEntitites.inkwellTileEntity.create();
     }
+    */
 
     @Override
     public boolean canClimb()
@@ -181,6 +182,9 @@ public class InkwellBlock extends Block implements IColoredBlock, IWaterLoggable
     @Override
     public int getColor(World level, BlockPos pos)
     {
+        return ColorInfoCapability.get(level, pos).getColor(pos);
+
+        /*
         if (level.getBlockEntity(pos) instanceof InkColorTileEntity)
         {
             InkColorTileEntity tileEntity = (InkColorTileEntity) level.getBlockEntity(pos);
@@ -190,6 +194,7 @@ public class InkwellBlock extends Block implements IColoredBlock, IWaterLoggable
             }
         }
         return -1;
+        */
     }
 
     @Override

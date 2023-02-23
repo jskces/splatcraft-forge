@@ -23,7 +23,10 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.splatcraft.forge.blocks.IColoredBlock;
 import net.splatcraft.forge.client.particles.InkSplashParticleData;
 import net.splatcraft.forge.data.SplatcraftTags;
+import net.splatcraft.forge.data.capabilities.blockcolorinfo.ColorInfoCapability;
+import net.splatcraft.forge.data.capabilities.blockcolorinfo.IBlockColorInfo;
 import net.splatcraft.forge.data.capabilities.playerinfo.PlayerInfoCapability;
+import net.splatcraft.forge.data.capabilities.worldinfo.WorldInfoCapability;
 import net.splatcraft.forge.entities.IColoredEntity;
 import net.splatcraft.forge.handlers.ScoreboardHandler;
 import net.splatcraft.forge.items.ColoredBlockItem;
@@ -33,6 +36,7 @@ import net.splatcraft.forge.registries.SplatcraftGameRules;
 import net.splatcraft.forge.registries.SplatcraftInkColors;
 import net.splatcraft.forge.tileentities.InkColorTileEntity;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Random;
 
@@ -123,16 +127,16 @@ public class ColorUtils
             return -1;
         }
 
+        if (te.getBlockState().getBlock() instanceof IColoredBlock)
+        {
+            return ((IColoredBlock) te.getBlockState().getBlock()).getColor(Objects.requireNonNull(te.getLevel()), te.getBlockPos());
+        }
+
         if (te instanceof InkColorTileEntity)
         {
             return ((InkColorTileEntity) te).getColor();
         }
 
-        te.getBlockState();
-        if (te.getBlockState().getBlock() instanceof IColoredBlock)
-        {
-            return ((IColoredBlock) te.getBlockState().getBlock()).getColor(Objects.requireNonNull(te.getLevel()), te.getBlockPos());
-        }
         return -1;
     }
 
@@ -331,4 +335,19 @@ public class ColorUtils
         level.addParticle(new InkSplashParticleData(rgb[0], rgb[1], rgb[2], size), x, y.y, z, 0.0D, 0.0D, 0.0D);
     }
 
+    public static int getInkColor(World level, BlockPos pos)
+    {
+        IBlockColorInfo info = ColorInfoCapability.get(level, pos);
+        return info.getColor(pos);
+    }
+
+    public static void setInkColor(World level, BlockPos pos, int inkColor)
+    {
+
+        IBlockColorInfo info = ColorInfoCapability.get(level, pos);
+        info.setColor(pos, inkColor);
+
+        if(inkColor != -1) //TODO figure out a way to encode none
+        WorldInfoCapability.get(level).getPendingColorData().addAll(Arrays.asList((long) level.getChunkAt(pos).getPos().x, (long) level.getChunkAt(pos).getPos().z, Long.parseLong(info.encode(pos).toUpperCase(), 16)));
+    }
 }

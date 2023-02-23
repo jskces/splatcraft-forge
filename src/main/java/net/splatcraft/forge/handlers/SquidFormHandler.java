@@ -121,11 +121,9 @@ public class SquidFormHandler {
 
             }
 
-            if (player.level.getBlockState(player.blockPosition().below()).getBlock() instanceof InkwellBlock)
+            if (!player.level.isClientSide && player.level.getBlockState(player.blockPosition().below()).getBlock() instanceof InkwellBlock)
             {
-                InkColorTileEntity inkwell = (InkColorTileEntity) player.level.getBlockEntity(player.blockPosition().below());
-
-                ColorUtils.setPlayerColor(player, inkwell.getColor());
+                ColorUtils.setPlayerColor(player, ((InkwellBlock)player.level.getBlockState(player.blockPosition().below()).getBlock()).getColor(player.level, player.blockPosition().below()));
             }
         }
         if (InkOverlayCapability.hasCapability(player))

@@ -24,6 +24,7 @@ import net.splatcraft.forge.SplatcraftConfig;
 import net.splatcraft.forge.client.gui.InkVatScreen;
 import net.splatcraft.forge.client.gui.WeaponWorkbenchScreen;
 import net.splatcraft.forge.data.SplatcraftTags;
+import net.splatcraft.forge.data.capabilities.blockcolorinfo.ColorInfoCapability;
 import net.splatcraft.forge.data.capabilities.playerinfo.PlayerInfoCapability;
 import net.splatcraft.forge.items.SquidBumperItem;
 import net.splatcraft.forge.registries.SplatcraftBlocks;
@@ -112,7 +113,12 @@ public class ClientSetupHandler
             if (iBlockDisplayReader == null || blockPos == null)
                 return -1;
 
-            int color = ColorUtils.getInkColor(iBlockDisplayReader.getBlockEntity(blockPos));
+            int color = ColorInfoCapability.get(Minecraft.getInstance().player.level, blockPos).getColor(blockPos);
+
+            if(color != -1)
+                return color;
+
+            color = ColorUtils.getInkColor(iBlockDisplayReader.getBlockEntity(blockPos));
 
             if (SplatcraftConfig.Client.getColorLock())
                 color = ColorUtils.getLockedColor(color);
