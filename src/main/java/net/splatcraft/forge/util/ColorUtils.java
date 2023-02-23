@@ -347,7 +347,7 @@ public class ColorUtils
         IBlockColorInfo info = ColorInfoCapability.get(level, pos);
         info.setColor(pos, inkColor);
 
-        if(inkColor != -1) //TODO figure out a way to encode none
+        if(info.getColor(pos) != -1) //TODO figure out a way to encode none
         WorldInfoCapability.get(level).getPendingColorData().addAll(Arrays.asList((long) level.getChunkAt(pos).getPos().x, (long) level.getChunkAt(pos).getPos().z, Long.parseLong(info.encode(pos).toUpperCase(), 16)));
     }
 }

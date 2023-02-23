@@ -44,6 +44,9 @@ public class BlockColorInfo implements IBlockColorInfo
 
     public String encode(BlockPos pos)
     {
+        if(!data.containsKey(pos))
+            return "";
+
         ColorData data = this.data.get(pos);
 
         return String.format("%02d", pos.getX() % 16) + String.format("%02X", pos.getY()) + String.format("%02d", pos.getZ() % 16) + String.format("%06x", data.color);
